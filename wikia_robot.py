@@ -1,18 +1,19 @@
-import time
 import requests
+from urllib.parse import unquote
 
 ck2URL = "https://ck2.parawikis.com/api.php"
 ck2enURL = "https://ck2.paradoxwikis.com/api.php"
 eu4URL = "https://www.eu4cn.com/api.php"
 URL = ck2URL
-enURL=ck2enURL
+enURL = ck2enURL
 S = requests.Session()
 CSRF_TOKEN = None
-password_ck2 = "hq4lunoqglja05olua15trg104d3gq0v"
-password_eu4 = "3dliq7j27elp13f1qbmglr85q3obrg04"
-password = password_ck2
+name = "忆九歌2"
+password = "mi16883538ma"
 proxydict = {'https': 'socks5://127.0.0.1:9542', 'http': 'socks5://127.0.0.1:9542'}
-#S.proxies.update(proxydict)
+
+
+# S.proxies.update(proxydict)
 
 def login():
     print("start logining")
@@ -29,12 +30,9 @@ def login():
 
     LOGIN_TOKEN = DATA1['query']['tokens']['logintoken']
     # print(LOGIN_TOKEN)
-    # Send a post request to login. Using the main account for login is not
-    # supported. Obtain credentials via Special:BotPasswords
-    # (https://www.mediawiki.org/wiki/Special:BotPasswords) for lgname & lgpassword
     PARAMS_1 = {
         'action': "login",
-        'lgname': "忆九歌@忆九歌-robot",
+        'lgname': name,
         'lgpassword': password,
         'lgtoken': LOGIN_TOKEN,
         'format': "json"
@@ -43,7 +41,7 @@ def login():
     R = S.post(URL, data=PARAMS_1)
     DATA2 = R.json()
     # print(DATA2)
-    # Step 3: Obtain a CSRF token
+    # Obtain a CSRF token
     PARAMS_3 = {
         "action": "query",
         "meta": "tokens",
@@ -58,7 +56,6 @@ def login():
 
 
 def upload(filename, path):
-    # Step 4: POST request to upload a file directly
     PARAMS_4 = {
         "action": "upload",
         "filename": filename,
@@ -70,13 +67,14 @@ def upload(filename, path):
     R = S.post(URL, files=FILE, data=PARAMS_4)
     DATA = R.json()
     print(DATA)
+
+
 def create(pagename, content):
     PARAMS = {
         "action": "edit",
         "title": pagename,
         "format": "json",
         "token": CSRF_TOKEN,
-        "ignorewarnings": 1,
         "text": content,
 
     }

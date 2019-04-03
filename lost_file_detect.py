@@ -3,16 +3,18 @@ import urllib.request
 import re
 import os
 import wikia_robot as wr
+from urllib.parse import unquote
 
-#proxy_support = urllib.request.ProxyHandler({'https': 'socks5://127.0.0.1:9542', 'http': 'socks5://127.0.0.1:9542'})
-#opener = urllib.request.build_opener(proxy_support)
-#urllib.request.install_opener(opener)
+proxy_support = urllib.request.ProxyHandler({'https': 'socks5://127.0.0.1:9542', 'http': 'socks5://127.0.0.1:9542'})
+# opener = urllib.request.build_opener(proxy_support)
+# urllib.request.install_opener(opener)
 # urlform = "https://eu4.paradoxwikis.com"
 # urlto = "https://www.eu4cn.com"
 urlform = "https://ck2.paradoxwikis.com"
 urlto = "https://ck2.parawikis.com"
 
 # Category:含有受损文件链接的页面
+# 使用该页面而不是Special:需要的文件是为了避免分析一些用户私有页面中请求的文件
 # dest_page_list = "https://www.eu4cn.com/wiki/Category:%E5%90%AB%E6%9C%89%E5%8F%97%E6%8D%9F%E6%96%87%E4%BB%B6%E9%93%BE%E6%8E%A5%E7%9A%84%E9%A1%B5%E9%9D%A2"
 dest_page_list = "https://ck2.parawikis.com/index.php?title=Category:%E5%90%AB%E6%9C%89%E5%8F%97%E6%8D%9F%E6%96%87%E4%BB%B6%E9%93%BE%E6%8E%A5%E7%9A%84%E9%A1%B5%E9%9D%A2"
 dir = './output/'
@@ -25,16 +27,18 @@ def repair(link):
     decoded = readed.decode('utf8')
     r = re.compile(r'(DestFile=)(.*?)(")')
     list1 = r.findall(decoded)
-    list2 = [i[1] for i in list1]
+    list2 = [unquote(i[1]) for i in list1]
     list2 = list(set(list2))
     content = []
     for word in list2:
         restr = urlform + "/File:" + word
-        data=wr.parse("File:"+word)
+        data = wr.parse("File:" + word)
+        # print("File:" + word)
+        # print(data)
         try:
-            if(not data.__contains__("error") and "REDIRECT" in data["parse"]["wikitext"]["*"]):
-                print("REDIRECT")
-                wr.create("File:"+word,data["parse"]["wikitext"]["*"])
+            if (not data.__contains__("error") and "REDIRECT" in data["parse"]["wikitext"]["*"]):
+                print("redirect found in " + "File:" + word + ", try to create the redirect web")
+                wr.create("File:" + word, data["parse"]["wikitext"]["*"])
                 continue
         except:
             pass
@@ -60,7 +64,7 @@ def repair(link):
         if not os.path.exists(dir + c[13:]):
             print("request to %s " % (urlform + c), end='')
             try:
-                with urllib.request.urlopen(urlform + c) as response, open(dir + c[13:], 'wb') as out_file:
+                with urllib.request.urlopen(urlform + c) as response, open(dir + unquote(c[13:]), 'wb') as out_file:
                     data = response.read()  # a `bytes` object
                     out_file.write(data)
                 print("success")
@@ -76,12 +80,11 @@ r = re.compile(r'(<li><a\shref=")(.*?)("\stitle=)')
 list3 = r.findall(decoded)
 for l in list3:
     if "User" not in l[1]:
-        print("repair to %s" % (l[1]))
+        print("repair to page %s" % (l[1]))
         repair(l[1])
 
-# path = "./output/"
-# files = os.listdir(path)
-# for name in files:
-#     print("upload " + path + "/" + name)
-#     wr.upload(name, path)
-
+path = "./output/"
+files = os.listdir(path)
+for name in files:
+    print("upload " + path + "/" + name)
+    wr.upload(name, path)
