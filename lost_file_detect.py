@@ -1,11 +1,15 @@
 # writed by chenassert 2019/3/25
+# todo:上传图片时加入分类
+# todo:separate the file upload function
+# todox:make gui(give up)
 import urllib.request
 import re
 import os
 import wikia_robot as wr
 from urllib.parse import unquote
 
-proxy_support = urllib.request.ProxyHandler({'https': 'socks5://127.0.0.1:9542', 'http': 'socks5://127.0.0.1:9542'})
+# proxy_support = urllib.request.ProxyHandler({'https': 'socks5://127.0.0.1:9542', 'http': 'socks5://127.0.0.1:9542'})
+# 手动指定socks代理
 # opener = urllib.request.build_opener(proxy_support)
 # urllib.request.install_opener(opener)
 # urlform = "https://eu4.paradoxwikis.com"
@@ -61,6 +65,7 @@ def repair(link):
     if not os.path.exists(dir):
         os.makedirs(dir)
     for c in content2:
+        # 13是什么?
         if not os.path.exists(dir + c[13:]):
             print("request to %s " % (urlform + c), end='')
             try:
@@ -72,19 +77,20 @@ def repair(link):
                 print("fail")
 
 
-wr.login()
-response = urllib.request.urlopen(dest_page_list)
-readed = response.read()
-decoded = readed.decode('utf8')
-r = re.compile(r'(<li><a\shref=")(.*?)("\stitle=)')
-list3 = r.findall(decoded)
-for l in list3:
-    if "User" not in l[1]:
-        print("repair to page %s" % (l[1]))
-        repair(l[1])
+if __name__ == "__main__":
+    wr.login()
+    response = urllib.request.urlopen(dest_page_list)
+    readed = response.read()
+    decoded = readed.decode('utf8')
+    r = re.compile(r'(<li><a\shref=")(.*?)("\stitle=)')
+    list3 = r.findall(decoded)
+    for l in list3:
+        if "User" not in l[1]:
+            print("repair to page %s" % (l[1]))
+            repair(l[1])
 
-path = "./output/"
-files = os.listdir(path)
-for name in files:
-    print("upload " + path + "/" + name)
-    wr.upload(name, path)
+    path = "./output/"
+    files = os.listdir(path)
+    for name in files:
+        print("upload " + path + "/" + name)
+        wr.upload(name, path)

@@ -3,11 +3,15 @@ import os
 import re
 import json
 
-file_list = ["text1.csv", "India.csv", "HolyFury.csv", "v1_06.csv", "JadeDragon.csv", "v2_70.csv", "v2_10.csv",
-             "v2_40.csv", "v1_10.csv", "v2_20.csv", "v2_81.csv", "text3.csv", "text8.csv"]
+#file_list = ["text1.csv", "India.csv", "HolyFury.csv"]
 file_list = None
-
-
+#<span style="color:red">此项设置将导致成就无效！</span>
+w = re.compile(r'(.*\|)(.*?)(<span.*?\n)')
+#w = re.compile(r'({{(.*?\|){2})(.*?)(\|)')#1,3,4
+group_num_front=1
+group_num_mid=2
+group_num_back=3
+#todo:cache
 def myopen(path, type="json"):
     re_list = list()
     files_zh = os.listdir(path)  # 得到文件夹下的所有文件名称
@@ -28,7 +32,8 @@ def myopen(path, type="json"):
     return re_list
 
 
-path = "./data/raw"  # 文件夹目录
+#path = "./data/eu4raw"  # 文件夹目录
+path = "./data/raw"
 tr_raw = myopen(path)
 
 dict_tr = dict()
@@ -44,15 +49,16 @@ file.close()
 
 
 def replace(matched):
-    str = matched.group(2)
-    # print(str.strip())
-    if dict_tr.__contains__(str.strip()):
-        return matched.group(1) + dict_tr[str.strip()] + matched.group(3)
+    str = matched.group(group_num_mid)
+    str=str.strip()
+    # print(str)
+    if dict_tr.__contains__(str):
+        #return matched.group(group_num_front) +"{{ruby|"+ dict_tr[str]+"|"+str+"}}" + matched.group(group_num_back)
+        return matched.group(group_num_front) + dict_tr[str] + matched.group(group_num_back)
     else:
         return matched.group(0)
 
 
-w = re.compile(r'(^\|\s)(.*?)(\n$)')
 for i in range(len(txtlist)):
     txtlist[i] = w.sub(lambda x: replace(x), txtlist[i])
 

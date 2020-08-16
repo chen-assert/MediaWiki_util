@@ -4,12 +4,13 @@ from urllib.parse import unquote
 ck2URL = "https://ck2.parawikis.com/api.php"
 ck2enURL = "https://ck2.paradoxwikis.com/api.php"
 eu4URL = "https://www.eu4cn.com/api.php"
+eu4enURL = "https://eu4.paradoxwikis.com/api.php"
 URL = ck2URL
 enURL = ck2enURL
 S = requests.Session()
 CSRF_TOKEN = None
 name = "忆九歌2"
-password = "mi16883538ma"
+password = "delete"
 proxydict = {'https': 'socks5://127.0.0.1:9542', 'http': 'socks5://127.0.0.1:9542'}
 
 
@@ -56,7 +57,7 @@ def login():
 
 
 def upload(filename, path):
-    PARAMS_4 = {
+    PARAMS = {
         "action": "upload",
         "filename": filename,
         "format": "json",
@@ -64,7 +65,7 @@ def upload(filename, path):
         "text": "== 授权协议 == \n {{C-Paradox}}"
     }
     FILE = {'file': (filename, open(path + filename, 'rb'), 'multipart/form-data')}
-    R = S.post(URL, files=FILE, data=PARAMS_4)
+    R = S.post(URL, files=FILE, data=PARAMS)
     DATA = R.json()
     print(DATA)
 
